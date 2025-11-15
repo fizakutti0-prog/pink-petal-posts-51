@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Image, X } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 interface ImageUploadProps {
@@ -30,25 +29,18 @@ export const ImageUpload = ({ onImageUploaded, currentImage, onImageRemoved }: I
 
     setUploading(true);
 
-    const fileExt = file.name.split(".").pop();
-    const fileName = `${Math.random()}.${fileExt}`;
-
-    const { data, error } = await supabase.storage
-      .from("post-images")
-      .upload(fileName, file);
-
-    setUploading(false);
-
-    if (error) {
+    // Convert to base64
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result as string;
+      onImageUploaded(base64String);
+      setUploading(false);
+    };
+    reader.onerror = () => {
       toast({ title: "Upload failed", variant: "destructive" });
-      return;
-    }
-
-    const { data: { publicUrl } } = supabase.storage
-      .from("post-images")
-      .getPublicUrl(data.path);
-
-    onImageUploaded(publicUrl);
+      setUploading(false);
+    };
+    reader.readAsDataURL(file);
   };
 
   return (
