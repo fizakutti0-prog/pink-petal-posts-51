@@ -2,6 +2,7 @@ import { Home, User as UserIcon, MessageCircle, Bell, LogOut, Copy } from "lucid
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import type { User } from "@/lib/userStore";
 
 interface SidebarProps {
@@ -28,9 +29,12 @@ export const Sidebar = ({ user, onLogout }: SidebarProps) => {
 
   return (
     <div className="hidden md:flex w-64 border-r border-border p-4 flex-col h-screen sticky top-0">
-      <h1 className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-8">
-        PinkBird
-      </h1>
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+          PinkBird
+        </h1>
+        <ThemeToggle />
+      </div>
 
       <nav className="flex-1 space-y-2">
         {navItems.map((item) => (

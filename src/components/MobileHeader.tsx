@@ -8,6 +8,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import type { User } from "@/lib/userStore";
 
 interface MobileHeaderProps {
@@ -84,7 +85,7 @@ export const MobileHeader = ({ user, onLogout }: MobileHeaderProps) => {
           PinkBird
         </h1>
 
-        <div className="w-10" />
+        <ThemeToggle />
       </div>
     </div>
   );
