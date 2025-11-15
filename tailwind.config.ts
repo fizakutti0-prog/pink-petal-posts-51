@@ -53,10 +53,12 @@ export default {
       backgroundImage: {
         'gradient-primary': 'var(--gradient-primary)',
         'gradient-secondary': 'var(--gradient-secondary)',
+        'gradient-mesh': 'var(--gradient-mesh)',
       },
       boxShadow: {
         'pink': 'var(--shadow-pink)',
         'glow': 'var(--shadow-glow)',
+        'card': 'var(--shadow-card)',
       },
       borderRadius: {
         lg: "var(--radius)",
