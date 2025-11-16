@@ -58,6 +58,12 @@ const Index = ({ onUserCreated, currentUser }: IndexProps) => {
         const likesCount = Array.isArray(post.likes) ? post.likes.length : 0;
         const retweetsCount = Array.isArray(post.retweets) ? post.retweets.length : 0;
 
+        // Count replies
+        const { count: repliesCount } = await supabase
+          .from("posts")
+          .select("*", { count: "exact", head: true })
+          .eq("reply_to", post.id);
+
         let isLiked = false;
         let isRetweeted = false;
 
@@ -67,14 +73,14 @@ const Index = ({ onUserCreated, currentUser }: IndexProps) => {
             .select("id")
             .eq("user_id", currentUser.id)
             .eq("post_id", post.id)
-            .single();
+            .maybeSingle();
 
           const { data: retweetData } = await supabase
             .from("retweets")
             .select("id")
             .eq("user_id", currentUser.id)
             .eq("post_id", post.id)
-            .single();
+            .maybeSingle();
 
           isLiked = !!likeData;
           isRetweeted = !!retweetData;
@@ -84,6 +90,7 @@ const Index = ({ onUserCreated, currentUser }: IndexProps) => {
           ...post,
           likes_count: likesCount,
           retweets_count: retweetsCount,
+          replies_count: repliesCount || 0,
           is_liked: isLiked,
           is_retweeted: isRetweeted,
         };

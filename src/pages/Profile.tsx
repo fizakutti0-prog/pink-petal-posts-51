@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { PostCard } from "@/components/PostCard";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Copy, UserPlus, UserMinus } from "lucide-react";
+import { Copy, UserPlus, UserMinus, MessageCircle } from "lucide-react";
 import type { User } from "@/lib/userStore";
 
 interface ProfileProps {
@@ -13,6 +13,7 @@ interface ProfileProps {
 
 export const Profile = ({ currentUser }: ProfileProps) => {
   const { userId } = useParams();
+  const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [posts, setPosts] = useState<any[]>([]);
   const [stats, setStats] = useState({ followers: 0, following: 0, posts: 0 });
@@ -53,13 +54,23 @@ export const Profile = ({ currentUser }: ProfileProps) => {
       .order("created_at", { ascending: false });
 
     if (data) {
-      const postsWithCounts = data.map((post: any) => ({
-        ...post,
-        likes_count: post.likes?.[0]?.count || 0,
-        retweets_count: post.retweets?.[0]?.count || 0,
-        is_liked: false,
-        is_retweeted: false,
-      }));
+      const postsWithCounts = await Promise.all(
+        data.map(async (post: any) => {
+          const { count: repliesCount } = await supabase
+            .from("posts")
+            .select("*", { count: "exact", head: true })
+            .eq("reply_to", post.id);
+
+          return {
+            ...post,
+            likes_count: post.likes?.[0]?.count || 0,
+            retweets_count: post.retweets?.[0]?.count || 0,
+            replies_count: repliesCount || 0,
+            is_liked: false,
+            is_retweeted: false,
+          };
+        })
+      );
       setPosts(postsWithCounts);
     }
   };
@@ -136,14 +147,24 @@ export const Profile = ({ currentUser }: ProfileProps) => {
               {user.display_name[0].toUpperCase()}
             </div>
             {currentUser?.id !== user.id && (
-              <Button
-                onClick={handleFollow}
-                variant={isFollowing ? "outline" : "default"}
-                className="gap-2"
-              >
-                {isFollowing ? <UserMinus className="w-4 h-4" /> : <UserPlus className="w-4 h-4" />}
-                {isFollowing ? "Unfollow" : "Follow"}
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => navigate('/messages', { state: { selectedUser: user } })}
+                  variant="outline"
+                  className="gap-2"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  Message
+                </Button>
+                <Button
+                  onClick={handleFollow}
+                  variant={isFollowing ? "outline" : "default"}
+                  className="gap-2"
+                >
+                  {isFollowing ? <UserMinus className="w-4 h-4" /> : <UserPlus className="w-4 h-4" />}
+                  {isFollowing ? "Unfollow" : "Follow"}
+                </Button>
+              </div>
             )}
           </div>
 

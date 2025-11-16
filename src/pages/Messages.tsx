@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +14,7 @@ interface MessagesProps {
 }
 
 export const Messages = ({ currentUser }: MessagesProps) => {
+  const location = useLocation();
   const [conversations, setConversations] = useState<any[]>([]);
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [messages, setMessages] = useState<any[]>([]);
@@ -22,7 +24,12 @@ export const Messages = ({ currentUser }: MessagesProps) => {
 
   useEffect(() => {
     fetchConversations();
-  }, []);
+    
+    // Check if a user was passed via navigation state
+    if (location.state?.selectedUser) {
+      setSelectedUser(location.state.selectedUser);
+    }
+  }, [location.state]);
 
   useEffect(() => {
     if (selectedUser) {
